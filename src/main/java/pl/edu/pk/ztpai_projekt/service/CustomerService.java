@@ -1,41 +1,53 @@
 package pl.edu.pk.ztpai_projekt.service;
 
 import org.springframework.stereotype.Service;
+import pl.edu.pk.ztpai_projekt.dto.CustomerRequest;
+import pl.edu.pk.ztpai_projekt.dto.CustomerResponse;
+import pl.edu.pk.ztpai_projekt.mapper.CustomerMapper;
 import pl.edu.pk.ztpai_projekt.model.Customer;
 import pl.edu.pk.ztpai_projekt.repository.CustomerRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomerService {
+
     private final CustomerRepository repository;
+    private final CustomerMapper mapper;
 
-    public CustomerService(CustomerRepository productRepository) {
-        this.repository = productRepository;
+    public CustomerService(CustomerRepository repository, CustomerMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
     }
 
-    public Customer createCustomer(Customer customer) {
-        return repository.save(customer);
+    public CustomerResponse createCustomer(CustomerRequest request) {
+        Customer customer = mapper.toEntity(request);
+        Customer savedCustomer = repository.save(customer);
+        return mapper.toResponse(savedCustomer);
     }
 
-    public List<Customer> getAllCustomers(){
-        return repository.findAll();
+    public List<CustomerResponse> getAllCustomers() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
-    public Optional<Customer> getCustomerById(Long id) {
-        return repository.findById(id);
-    }
-
-    public Customer updateCustomer(Long id, Customer customerDetails) {
+    public CustomerResponse getCustomerById(Long id) {
         Customer customer = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        customer.setFirstName(customerDetails.getFirstName());
-        customer.setLastName(customerDetails.getLastName());
-        customer.setEmailAddress(customerDetails.getEmailAddress());
+        return mapper.toResponse(customer);
+    }
 
-        return repository.save(customer);
+    public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
+        Customer customer = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        mapper.updateEntity(customer, request);
+
+        Customer updatedCustomer = repository.save(customer);
+        return mapper.toResponse(updatedCustomer);
     }
 
     public void deleteCustomer(Long id) {

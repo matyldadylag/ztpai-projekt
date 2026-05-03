@@ -1,15 +1,17 @@
 package pl.edu.pk.ztpai_projekt.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import pl.edu.pk.ztpai_projekt.model.Customer;
+import pl.edu.pk.ztpai_projekt.dto.CustomerRequest;
+import pl.edu.pk.ztpai_projekt.dto.CustomerResponse;
 import pl.edu.pk.ztpai_projekt.service.CustomerService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerController {
+
     private final CustomerService service;
 
     public CustomerController(CustomerService customerService) {
@@ -17,23 +19,26 @@ public class CustomerController {
     }
 
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return service.createCustomer(customer);
+    public CustomerResponse createCustomer(@Valid @RequestBody CustomerRequest request) {
+        return service.createCustomer(request);
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
+    public List<CustomerResponse> getAllCustomers() {
         return service.getAllCustomers();
     }
 
     @GetMapping("/{id}")
-    public Optional<Customer> getCustomerById(@PathVariable Long id) {
+    public CustomerResponse getCustomerById(@PathVariable Long id) {
         return service.getCustomerById(id);
     }
 
     @PutMapping("/{id}")
-    public Customer updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
-        return service.updateCustomer(id, customer);
+    public CustomerResponse updateCustomer(
+            @PathVariable Long id,
+            @Valid @RequestBody CustomerRequest request
+    ) {
+        return service.updateCustomer(id, request);
     }
 
     @DeleteMapping("/{id}")
