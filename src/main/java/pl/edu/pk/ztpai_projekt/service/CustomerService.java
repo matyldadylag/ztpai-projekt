@@ -21,6 +21,10 @@ public class CustomerService {
     }
 
     public CustomerResponse createCustomer(CustomerRequest request) {
+        if (repository.existsByEmailAddress(request.getEmailAddress())) {
+            throw new IllegalArgumentException("Klient z takim adresem email już istnieje");
+        }
+
         Customer customer = mapper.toEntity(request);
         Customer savedCustomer = repository.save(customer);
         return mapper.toResponse(savedCustomer);
@@ -43,6 +47,11 @@ public class CustomerService {
     public CustomerResponse updateCustomer(Long id, CustomerRequest request) {
         Customer customer = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        if (!customer.getEmailAddress().equals(request.getEmailAddress())
+                && repository.existsByEmailAddress(request.getEmailAddress())) {
+            throw new IllegalArgumentException("Klient z takim adresem email już istnieje");
+        }
 
         mapper.updateEntity(customer, request);
 
