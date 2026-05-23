@@ -1,5 +1,6 @@
 package pl.edu.pk.ztpai_projekt.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -40,10 +41,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public UserDetailsService userDetailsService(
+            PasswordEncoder passwordEncoder,
+            @Value("${security.admin.username}") String adminUsername,
+            @Value("${security.admin.password}") String adminPassword
+    ) {
         return new InMemoryUserDetailsManager(
-                User.withUsername("admin")
-                        .password(passwordEncoder.encode("admin123"))
+                User.withUsername(adminUsername)
+                        .password(passwordEncoder.encode(adminPassword))
                         .roles("USER")
                         .build()
         );
